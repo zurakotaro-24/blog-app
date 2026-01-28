@@ -1,0 +1,27 @@
+{
+  "name": "blog-app",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run dev --prefix client\" \"npm run dev --prefix server\"",
+    "client": "npm run dev --prefix client",
+    "server": "npm run dev --prefix server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zurakotaro-24/blog-app.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/zurakotaro-24/blog-app/issues"
+  },
+  "homepage": "https://github.com/zurakotaro-24/blog-app#readme",
+  "dependencies": {
+    "concurrently": "^9.2.1"
+  }
+}
