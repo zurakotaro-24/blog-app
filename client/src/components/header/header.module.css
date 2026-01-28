@@ -1,0 +1,43 @@
+.container {
+    box-shadow: 0px 2px 5px rgba(0,0,0,0.3);
+    display: flex;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background-color: white;
+    padding: 0 1rem;
+}
+
+.leftHeader {
+    padding-left: 10%;
+    display: flex;
+    justify-content: left;
+    flex: 1;
+}
+
+.leftHeader p {
+    font-weight: bold;
+    font-size: 2rem;
+    margin: 1.5rem;
+}
+
+.rightHeader {
+    display: flex;
+    justify-self: end;
+    gap: 1rem;
+}
+
+.rightHeader button {
+    border-radius: 1rem;
+    border: none;
+    cursor: pointer;
+    padding: 1rem;
+    font-weight: normal;
+    font-size: .95rem;
+}
+
+.rightHeader button:hover {
+    background-color: grey;
+    transition: 0.3s ease;
+}
