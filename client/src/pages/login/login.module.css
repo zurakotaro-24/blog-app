@@ -1,0 +1,44 @@
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 90svh;
+}
+
+.loginForm {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid black;
+    min-width: 300px;
+    padding: 2rem;
+}
+
+.loginForm button {
+    align-self: center;
+    margin-top: 1rem;
+    padding: 0.25rem;
+    width: 200px;
+}
+
+.formInput {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.formInput span {
+    text-align: end;
+    flex: 1;
+}
+
+.signupText {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.signupLink {
+    color: blue;
+    cursor: pointer;
+    text-decoration: underline;
+}

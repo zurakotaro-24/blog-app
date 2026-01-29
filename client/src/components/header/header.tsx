@@ -9,6 +9,10 @@ export default function Header() {
         navigate("/login");
     }
 
+    const navigateToSignup = () => {
+        navigate("/signup");
+    }
+
     return (
         <header className={styles.container}>
             <div className={styles.leftHeader}>
@@ -24,7 +28,7 @@ export default function Header() {
                 ) : (
                     <>
                         <button onClick={navigateToLogin}>Log in</button>
-                        <button>Sign up</button>
+                        <button onClick={navigateToSignup}>Sign up</button>
                     </>
                 )}
             </div>
