@@ -3,7 +3,7 @@ import pool from "../config/dbConnection.js";
 export async function createUser(user) {
     try {
         const query = `
-            INSERT INTO users(email, password, firstName, lastName) 
+            INSERT INTO users(email, password, firstname, lastname) 
             VALUES ($1, $2, $3, $4);
         `;
 

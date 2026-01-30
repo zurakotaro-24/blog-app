@@ -10,6 +10,4 @@ const router = express.Router();
 router.post("/create-acc", createAccount);
 router.post("/login-acc", loginAccount);
 
-// GET /api/users
-
 export default router;

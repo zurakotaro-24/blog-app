@@ -29,8 +29,7 @@ export default function Signup() {
 
         const { elements } = e.currentTarget;
         if(elements.password.value != elements.confirmPassword.value) {
-            toast.warning("Password and Confirm Password are not the same");
-            
+            toast.warning("Password and Confirm Password are not the same");  
             return;
         }
 
@@ -47,8 +46,9 @@ export default function Signup() {
         }
         
         try {
-            await createAccount(newAccount);
-            e.currentTarget.reset();
+            await createAccount(newAccount).unwrap();
+            toast.success("Account created successfully");
+            navigate("/login");
         }
         catch(err) {
             console.error(err, error);

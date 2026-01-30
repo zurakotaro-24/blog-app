@@ -1,19 +1,16 @@
 import { configureStore } from "@reduxjs/toolkit"; 
-import counterReducer from "../features/counter/counterSlice";
-import { dogsApiSlice } from "../features/dogs/dogsSlice";
 import authReducer from "../features/auth/authSlice";
+import blogReducer from "../features/blogs/blogSlice";
 import { apiSlice } from "../features/api/apiSlice";
 
 export const store = configureStore({
     reducer: { 
-        auth: authReducer,
-        counter: counterReducer, 
-        [dogsApiSlice.reducerPath]: dogsApiSlice.reducer,
+        auth: authReducer, 
+        blogs: blogReducer,
         [apiSlice.reducerPath]: apiSlice.reducer
     },
     middleware: (getDefaultMiddleware) => {
         return getDefaultMiddleware()
-            .concat(dogsApiSlice.middleware)
             .concat(apiSlice.middleware);
     }
 });

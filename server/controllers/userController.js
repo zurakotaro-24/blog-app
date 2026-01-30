@@ -18,12 +18,14 @@ export const createAccount = asyncHandler(async(req, res, next) => {
         !user.lastName
     ) {
         res.status(400);
-        throw new Error("All fields must be provided");
+        throw new Error("All fields must be provided.");
     }
 
     const hashedPassword = await bcrypt.hash(user.password, 10);
     user.password = hashedPassword;
     await createUser(user);
+
+    res.status(201).json({ success: true });
 });
 
 // @desc Login Account 
@@ -36,7 +38,7 @@ export const loginAccount = asyncHandler(async(req, res, next) => {
         !acc.password
     ) {
         res.status(400);
-        throw new Error("All fields must be provided");
+        throw new Error("All fields must be provided.");
     }
 
     const user = await findUserByEmail(acc.email);
@@ -54,11 +56,9 @@ export const loginAccount = asyncHandler(async(req, res, next) => {
 
     const accessToken = jwt.sign(
         {
-            user: {
-                id: user.id, 
-                email: user.email, 
-                name: `${user.firstName} ${user.lastName}`,
-            },
+            id: user.id, 
+            email: user.email, 
+            name: `${user.firstname} ${user.lastname}`,
         }, 
         process.env.ACCESS_TOKEN_SECRET, 
         { expiresIn: "1d" }

@@ -36,6 +36,7 @@ export default function Login() {
             const result = await loginAccount(loginCredentials).unwrap();
             toast.success("Logged in successfully");
             dispatch(authorizeUser({ accessToken: result.accessToken }));
+            navigate("/");
         }
         catch(err) {
             toast.warning("User credentials are not correct.");
