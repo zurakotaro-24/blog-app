@@ -42,6 +42,7 @@ export default function Header() {
                         <>
                             <p>Welcome, {user.name}</p>
                             <button onClick={addBlog}>Add A Blog</button>
+                            <button onClick={addBlog}>View your Blogs</button>
                             <button onClick={() => setIsModalOpen(true)}>Log out</button>
                         </>
                     ) : (

@@ -63,11 +63,26 @@ export const apiSlice = createApi({
                 };
             }
         }),
+        getBlogs: builder.query<Blog[], string | null>({
+            query(id) {
+                if(id) {
+                    return {
+                        url: `/blogs/list?id=${id}`, 
+                        method: "GET", 
+                    }
+                }
+                return {
+                    url: `/blogs/list`, 
+                    method: "GET",
+                }
+            }
+        }),
     })
 });
 
 export const { 
     useCreateAccountMutation, 
     useLoginAccountMutation, 
-    useUploadBlogMutation 
+    useUploadBlogMutation, 
+    useGetBlogsQuery,
 } = apiSlice;

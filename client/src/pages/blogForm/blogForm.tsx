@@ -3,7 +3,7 @@ import styles from "./blogForm.module.css";
 import logo from "../../logo.svg";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { addBlog, type Blog } from "../../features/blogs/blogSlice";
+import { addBlog } from "../../features/blogs/blogSlice";
 import { useDispatch } from "react-redux";
 import { useUploadBlogMutation, type BlogUpload } from "../../features/api/apiSlice";
 

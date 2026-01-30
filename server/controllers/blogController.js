@@ -1,11 +1,16 @@
 import asyncHandler from "express-async-handler";
 import {
     createInitialBlog, 
-    updateBlogImage
+    getAllBlogs, 
+    updateBlogImage, 
+    getBlogsOfUser,
 } from "../models/blogModel.js";
 import { processImage } from "../services/imageService.js";
 import { supabase } from "../config/supabaseConnection.js";
 
+// @desc Inserting/Uploading a blog 
+// @route POST /api/blogs/upload
+// @access Public
 export const insertBlog = asyncHandler(async(req, res, next) => {    
     const { 
         title,  
@@ -73,4 +78,29 @@ export const insertBlog = asyncHandler(async(req, res, next) => {
 
     const uploadedBlog = await updateBlogImage(blogId, imagePath);
     return res.status(200).json(uploadedBlog);
+});
+
+// @desc Get all blogs 
+// @route GET /api/blogs/list 
+// @access Public 
+export const fetchAllBlogs = asyncHandler(async(req, res, next) => {
+    const blogs = await getAllBlogs();
+    if(!blogs) {
+        res.status(404); 
+        throw new Error("Blogs not found");
+    }
+    return res.status(200).json(blogs);
+});
+
+// @desc Get all blogs for one user
+// @route GET /api/blogs/list/:id
+// @access Public 
+export const fetchBlogs = asyncHandler(async(req, res, next) => {
+    const authorId = Number(req.params.id);
+    const blogs = await getBlogsOfUser(authorId);
+    if(!blogs) {
+        res.status(404);
+        throw new Error("Blogs not found");
+    }
+    return res.status(200).json(blogs);
 });

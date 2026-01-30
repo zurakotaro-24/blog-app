@@ -44,3 +44,68 @@ export async function updateBlogImage(blogId, imagePath) {
         throw err;
     }
 }
+
+export async function getAllBlogs() {
+    try {
+        const query = `
+            SELECT b.id, b.title, b.body_content, b.image, b.publicationdate, b.authorid, 
+            CONCAT(u.firstname, ' ', u.lastname) as name 
+            FROM blogs as b 
+            INNER JOIN users as u 
+            ON b.authorid = u.id;
+        `;
+
+        const result = await pool.query(query);
+        return result.rows.map(row => ({
+            id: row.id, 
+            title: row.title, 
+            description: row.body_content, 
+            image: row.image, 
+            publicationDate: new Date(row.publicationdate).toLocaleDateString("en-US", {
+                year: "numeric", 
+                month: "long", 
+                day: "numeric",
+            }),
+            authorId: row.authorid, 
+            authorName: row.name
+        }));
+    }
+    catch(err) {
+        throw err;
+    }
+}
+
+export async function getBlogsOfUser(authorId) {
+    try {
+        const query = `
+            SELECT b.id, b.title, b.body_content, b.image, b.publicationdate, b.authorid, 
+            CONCAT(u.firstname, ' ', u.lastname) as name 
+            FROM blogs as b 
+            INNER JOIN users as u 
+            ON b.authorid = u.id 
+            WHERE u.id = $1;
+        `;
+
+        const values = [
+            authorId,
+        ];
+
+        const result = await pool.query(query, values);
+        return result.rows.map(row => ({
+            id: row.id, 
+            title: row.title, 
+            description: row.body_content, 
+            image: row.image, 
+            publicationDate: new Date(row.publicationdate).toLocaleDateString("en-US", {
+                year: "numeric", 
+                month: "long", 
+                day: "numeric",
+            }),
+            authorId: row.authorid, 
+            authorName: row.name
+        }));
+    }
+    catch(err) {
+        throw err;
+    }
+}
