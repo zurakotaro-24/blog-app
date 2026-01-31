@@ -109,3 +109,39 @@ export async function getBlogsOfUser(authorId) {
         throw err;
     }
 }
+
+export async function getBlogInfo(blogId) {
+    try {
+        const query = `
+            SELECT b.id, b.title, b.body_content, b.image, b.publicationdate, b.authorid, 
+            CONCAT(u.firstname, ' ', u.lastname) as name 
+            FROM blogs as b 
+            INNER JOIN users as u 
+            ON b.authorid = u.id 
+            where b.id = $1;
+        `;
+        
+        const values = [
+            blogId
+        ];
+
+        const result = await pool.query(query, values);
+        const row = result.rows[0];
+        return {
+            id: row.id, 
+            title: row.title, 
+            description: row.body_content, 
+            image: row.image, 
+            publicationDate: new Date(row.publicationdate).toLocaleDateString("en-US", {
+                year: "numeric", 
+                month: "long", 
+                day: "numeric",
+            }),
+            authorId: row.authorid, 
+            authorName: row.name
+        }
+    }
+    catch(err) {
+        throw err;
+    }
+}

@@ -12,6 +12,10 @@ export default function Header() {
     const dispatch = useDispatch();
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
+    const navigateToHome = () => {
+        navigate("/");
+    }
+
     const navigateToLogin = () => {
         navigate("/login");
     }
@@ -31,18 +35,22 @@ export default function Header() {
         navigate("/add-blog");
     }
 
+    const navigateToViewBlogs = () => {
+        navigate("/user-blogs");
+    }
+
     return (
         <>
             <header className={styles.container}>
                 <div className={styles.leftHeader}>
-                    <p>Blog Website</p>
+                    <p onClick={navigateToHome}>Blog Website</p>
                 </div>
                 <div className={styles.rightHeader}>
                     {user.id ? (
                         <>
                             <p>Welcome, {user.name}</p>
                             <button onClick={addBlog}>Add A Blog</button>
-                            <button onClick={addBlog}>View your Blogs</button>
+                            <button onClick={navigateToViewBlogs}>View your Blogs</button>
                             <button onClick={() => setIsModalOpen(true)}>Log out</button>
                         </>
                     ) : (

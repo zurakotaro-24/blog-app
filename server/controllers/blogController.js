@@ -4,6 +4,7 @@ import {
     getAllBlogs, 
     updateBlogImage, 
     getBlogsOfUser,
+    getBlogInfo,
 } from "../models/blogModel.js";
 import { processImage } from "../services/imageService.js";
 import { supabase } from "../config/supabaseConnection.js";
@@ -103,4 +104,17 @@ export const fetchBlogs = asyncHandler(async(req, res, next) => {
         throw new Error("Blogs not found");
     }
     return res.status(200).json(blogs);
+});
+
+// @desc Get Blog info 
+// @route GET /api/blogs/:id
+// @access Public
+export const fetchBlogInfo = asyncHandler(async(req, res, next) => {
+    const blogId = Number(req.params.id);
+    const blog = await getBlogInfo(blogId);
+    if(!blog) {
+        res.status(404);
+        throw new Error("Blog not found");
+    }
+    return res.status(200).json(blog);
 });

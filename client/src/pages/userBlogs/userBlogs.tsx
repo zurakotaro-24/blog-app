@@ -1,21 +1,27 @@
 import { useEffect, useState } from "react";
 import Header from "../../components/header/header"
-import styles from "./home.module.css";
+import styles from "./userBlogs.module.css";
 import { useGetBlogsQuery } from "../../features/api/apiSlice";
 import { supabase } from "../../app/supabaseClient";
 import ReactPaginate from "react-paginate";
+import { useNavigate } from "react-router-dom";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { BlogImage } from "../home/home";
 
-export interface BlogImage {
-    id: number | null; 
-    image: string;
-}
-
-export default function Home() {
+export default function UserBlogs() {
+    const user = JSON.parse(localStorage.getItem("user") || ("{}"));
+    const navigate = useNavigate();
     const BUCKETNAME = import.meta.env.VITE_SUPABASE_BUCKETNAME;
-    const { data, error, isLoading } = useGetBlogsQuery(null);
+    const { data, error, isLoading } = useGetBlogsQuery(user.id ? user.id : skipToken);
     const [images, setImages] = useState<BlogImage[]>([]);
     const [currentPage, setCurrentPage] = useState(0);
     const itemsPerPage = 6;
+
+    useEffect(() => {
+        if(!user || !user.id) {
+            navigate("/");
+        }
+    }, [user]);
 
     useEffect(() => {
         if(data) {

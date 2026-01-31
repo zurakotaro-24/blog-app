@@ -17,10 +17,13 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.1",
+    "@supabase/supabase-js": "^2.93.3",
     "axios": "^1.13.4",
+    "bootstrap": "^5.3.8",
     "jwt-decode": "^4.0.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-paginate": "^8.3.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.13.0",
     "react-toastify": "^11.0.5"
