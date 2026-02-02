@@ -151,7 +151,7 @@ export default function ViewBlog() {
                         </div>
                         <div className={styles.commentsContainer}>
                             <h5>Comments</h5>
-                            {storedComments.length < 0 ? (
+                            {storedComments.length <= 0 ? (
                                 <div>
                                     <p>No comments yet</p>
                                 </div>
