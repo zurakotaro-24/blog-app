@@ -4,6 +4,10 @@ import styles from "./home.module.css";
 import { useGetBlogsQuery } from "../../features/api/apiSlice";
 import { supabase } from "../../app/supabaseClient";
 import ReactPaginate from "react-paginate";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { setBlogs } from "../../features/blogs/blogSlice";
+import { RootState } from "../../app/store";
 
 export interface BlogImage {
     id: number | null; 
@@ -12,14 +16,23 @@ export interface BlogImage {
 
 export default function Home() {
     const BUCKETNAME = import.meta.env.VITE_SUPABASE_BUCKETNAME;
-    const { data, error, isLoading } = useGetBlogsQuery(null);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+    const storedBlogs = useSelector((state: RootState) => state.blogs);
+    const { data: blogs, error, isLoading } = useGetBlogsQuery(null);
     const [images, setImages] = useState<BlogImage[]>([]);
     const [currentPage, setCurrentPage] = useState(0);
     const itemsPerPage = 6;
 
     useEffect(() => {
-        if(data) {
-            const urls = data.map((blog) => {
+        if(blogs) {
+            dispatch(setBlogs(blogs));
+        }
+    }, [blogs]); 
+
+    useEffect(() => {
+        if(storedBlogs) {
+            const urls = storedBlogs.map((blog) => {
                 const { data } = supabase.storage
                     .from(BUCKETNAME)
                     .getPublicUrl(blog.image);
@@ -31,14 +44,18 @@ export default function Home() {
             });
             setImages(urls);
         }
-    }, [data]);
+    }, [storedBlogs]);
 
     const offset = currentPage * itemsPerPage;
-    const currentBlogs = data?.slice(offset, offset + itemsPerPage)
-    const pageCount = Math.ceil((data?.length || 0) / itemsPerPage);
+    const currentBlogs = storedBlogs?.slice(offset, offset + itemsPerPage)
+    const pageCount = Math.ceil((storedBlogs?.length || 0) / itemsPerPage);
 
     const handlePageClick = (e: { selected: number }) => {
         setCurrentPage(e.selected);
+    }
+
+    const viewSpecificBlog = (id: number | null) => {
+        navigate(`/blogs/${id}`);
     }
 
     return (
@@ -54,7 +71,7 @@ export default function Home() {
                         <h2>All Blogs</h2>
                         <div className={styles.blogContainer}>
                             {currentBlogs.map((blog) => (
-                                <div className={styles.blogCard} key={blog.id}>
+                                <div className={styles.blogCard} key={blog.id} onClick={() => viewSpecificBlog(blog.id)}>
                                     <img className={styles.blogImage}
                                         src={images.find(img => img.id === blog.id)?.image || undefined} />
                                     <p>{blog.title}</p>

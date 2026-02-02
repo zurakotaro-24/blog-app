@@ -1,7 +1,8 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { UpdatedBlogResult } from "../api/apiSlice";
 
 export interface Blog {
-    id: number | null, 
+    id: number, 
     title: string, 
     description: string, 
     image: string, 
@@ -10,17 +11,7 @@ export interface Blog {
     authorName: string,
 }
 
-const initialState: Blog[] = [
-    { 
-        id: null, 
-        title: "", 
-        description: "", 
-        image: "", 
-        publicationDate: null, 
-        authorId: null, 
-        authorName: "" 
-    },
-]
+const initialState: Blog[] = [];
 
 const blogSlice = createSlice({
     name: "blogs", 
@@ -29,9 +20,23 @@ const blogSlice = createSlice({
         addBlog(state, action: PayloadAction<Blog>) {
             state.push(action.payload);
         }, 
+        setBlogs(state, action: PayloadAction<Blog[]>) {
+            return action.payload;
+        }, 
+        updateBlogState(state, action: PayloadAction<UpdatedBlogResult>) {
+            const index = state.findIndex(blog => blog.id === action.payload.id);
+            if(index >= 0) {
+                state[index] = { 
+                    ...state[index],  
+                    title: action.payload.title, 
+                    description: action.payload.description, 
+                    image: action.payload.image,
+                };
+            }
+        }, 
     }
 });
 
-export const { addBlog } = blogSlice.actions;
+export const { addBlog, setBlogs, updateBlogState } = blogSlice.actions;
 
 export default blogSlice.reducer;

@@ -1,4 +1,4 @@
-import pool from "../config//dbConnection.js";
+import pool from "../config/dbConnection.js";
 
 export async function createInitialBlog(blog) {
     try {
@@ -140,6 +140,50 @@ export async function getBlogInfo(blogId) {
             authorId: row.authorid, 
             authorName: row.name
         }
+    }
+    catch(err) {
+        throw err;
+    }
+}
+
+export async function deleteBlog(blogId) {
+    try {
+        const query = `
+            DELETE FROM blogs 
+            WHERE id = $1;
+        `;
+
+        const values = [
+            blogId,
+        ];
+
+        await pool.query(query, values);
+    }
+    catch(err) {
+        throw err;
+    }
+}
+
+export async function updateBlog(blog) {
+    try {
+        const query = `
+            UPDATE blogs 
+            SET title = $1, 
+                body_content = $2, 
+                image = $3  
+            WHERE id = $4 
+            RETURNING *;
+        `;
+
+        const values = [
+            blog.title, 
+            blog.description, 
+            blog.imagePath, 
+            blog.id
+        ];
+
+        const result = await pool.query(query, values);
+        return result.rows[0];
     }
     catch(err) {
         throw err;

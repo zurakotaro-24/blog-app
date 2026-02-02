@@ -8,7 +8,6 @@ import {
 
 // @desc Create Account 
 // @route POST /api/users/create-acc
-// @access Public
 export const createAccount = asyncHandler(async(req, res, next) => {
     const user = req.body;
     if(
@@ -30,7 +29,6 @@ export const createAccount = asyncHandler(async(req, res, next) => {
 
 // @desc Login Account 
 // @route GET /api/users/login-acc 
-// @access Public 
 export const loginAccount = asyncHandler(async(req, res, next) => {
     const acc = req.body;
     if(

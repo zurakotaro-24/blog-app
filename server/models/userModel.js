@@ -38,3 +38,23 @@ export async function findUserByEmail(email) {
         throw err;
     }
 }
+
+export async function getNameById(id) {
+    try {
+        const query = `
+            SELECT CONCAT(firstname, ' ', lastname) as name 
+            FROM users 
+            WHERE id = $1;
+        `;
+
+        const values = [
+            id
+        ];
+
+        const result = await pool.query(query, values);
+        return result.rows[0];
+    }
+    catch(err) {
+        throw err;
+    }
+}

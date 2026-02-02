@@ -8,6 +8,8 @@ import BlogForm from "./pages/blogForm/blogForm";
 import UserBlogs from "./pages/userBlogs/userBlogs";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ViewBlog from "./pages/viewBlog/viewBlog";
+import UserViewBlog from "./pages/userViewBlog/userViewBlog";
+import UserEditBlog from "./pages/userEditBlog/userEditBlog";
 
 export const App = () => {
   return (
@@ -19,9 +21,11 @@ export const App = () => {
         <Route path="/" element={ <Home /> } />
         <Route path="/login" element={ <Login /> } />
         <Route path="/signup" element={ <Signup /> } />
-        <Route path="/add-blog" element={ <BlogForm/> } />
+        <Route path="/add-blog" element={ <BlogForm /> } />
         <Route path="/user-blogs" element={  <UserBlogs /> } />
-        <Route path="/blogs/:id" element={ <ViewBlog/> } />
+        <Route path="/blogs/:id" element={ <ViewBlog /> } /> 
+        <Route path="/user-blogs/:id" element={ <UserViewBlog /> }/>
+        <Route path="/user-blogs/edit/:id" element={ <UserEditBlog /> } />
       </Routes>
     </>
   );

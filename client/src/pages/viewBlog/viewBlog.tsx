@@ -1,47 +1,168 @@
 import Header from "../../components/header/header"
 import styles from "./viewBlog.module.css";
-import logo from "../../logo.svg";
-import { useParams } from "react-router-dom";
-import { useGetBlogQuery } from "../../features/api/apiSlice";
+import { useNavigate, useParams } from "react-router-dom";
+import { type CommentUpload, useGetBlogQuery, useUploadCommentMutation } from "../../features/api/apiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useState, useEffect } from "react";
 import { supabase } from "../../app/supabaseClient";
 import { BlogImage } from "../home/home";
+import logo from "../../logo.svg";
+import { toast } from "react-toastify";
+import { useDispatch } from "react-redux";
+import { addComment } from "../../features/comments/commentSlice";
 
 export default function ViewBlog() {
     const { id } = useParams();
+    const user = JSON.parse(localStorage.getItem("user") || ("{}"));
     const BUCKETNAME = import.meta.env.VITE_SUPABASE_BUCKETNAME;
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [image, setImage] = useState<BlogImage | null>();
-    const { data, error, isLoading } = useGetBlogQuery(id ? id : skipToken);
+    const { data: blogInfo, error, isLoading } = useGetBlogQuery(id ? id : skipToken);
+    const [uploadComment, { error: uploadError }] = useUploadCommentMutation();
+    const [isNewCommentOpen, setIsNewCommentOpen] = useState<boolean>(false);
+    const [newComment, setNewComment] = useState<{ image: File | undefined, comment: string }>({
+        image: undefined, 
+        comment: ""
+    });
 
     useEffect(() => {
-        if(data) {
-            console.log(data.image);
+        if(blogInfo) {
             const { data: { publicUrl } } = supabase.storage
                 .from(BUCKETNAME)
-                .getPublicUrl(data.image);
+                .getPublicUrl(blogInfo.image);
             setImage({
-                id: data.id, 
+                id: blogInfo.id, 
                 image: publicUrl,
             });
         }
-    }, [data]);
+    }, [blogInfo]);
+
+    useEffect(() => {
+        if(!id) {
+            navigate("/");
+        }
+    }, [id]);
+
+    const openNewComment = () => {
+        if(!user || !user.id) {
+            toast.warning("Please login first to comment");
+            return;
+        }
+        setIsNewCommentOpen(true);
+    }
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        setNewComment(prev => ({
+            ...prev, 
+            image: file,
+        }));
+    }
+
+    const submitAddComment = async() => {
+        if(!newComment.comment) {
+            toast.warning("Please insert a comment");
+            return;
+        }
+
+        const newUpload: CommentUpload = {
+            image: newComment?.image ? newComment.image : undefined, 
+            commentText: newComment.comment, 
+            commentorId: user.id, 
+            blogId: blogInfo!.id.toString(),
+        }
+
+        try {
+            const addedComment = await uploadComment(newUpload).unwrap();
+            toast.success("Comment added successfully");
+            dispatch(addComment(addedComment));
+        }
+        catch(err) {
+            console.error(err, uploadError);
+        }
+    };
 
     return(
         <div className="page">
             <Header />
             <div className="content">
-                <div className={styles.blogContainer}>
-                    <div className={styles.leftContainer}>
-                        <img src={logo}/>
+                {isLoading || !blogInfo ? (
+                    <>
+                        <p>Loading</p>
+                    </>
+                ) : (
+                    <div>
+                        <div className={styles.blogContainer}>
+                            <div className={styles.leftContainer}>
+                                <img src={image ? image.image : undefined}/>
+                            </div>
+                            <div className={styles.centerLine}>
+                                
+                            </div>
+                            <div className={styles.rightContainer}>
+                                <p className={styles.blogTitle}>{blogInfo.title}</p>
+                                <p>Published by: {blogInfo.authorName}</p>
+                                <p>Published on: {blogInfo.publicationDate?.toString()}</p>
+                                <p className={styles.blogDesc}>{blogInfo.description}</p>
+                            </div>
+                        </div>
+                        <div className={styles.commentsContainer}>
+                            <h5>Comments</h5>
+                            <div className={styles.comment}>
+                                <p className={styles.commentorName}>Commentor Name</p>
+                                <p className={styles.commentText}>Comment</p>
+                                <img src={logo} />
+                            </div>
+                            {!isNewCommentOpen ? (
+                                <div className={styles.addComment}>
+                                    <button onClick={openNewComment}>Add Comment</button>
+                                </div>
+                            ): (
+                                <div className={styles.addCommentNew}>
+                                    <div className={styles.addCommentTop}>
+                                        <p>Add Comment</p>
+                                        <button onClick={() => setIsNewCommentOpen(false)}>Close</button>
+                                    </div>
+                                    <div className={styles.addCommentInput}>
+                                        <div className={styles.imageArea}>
+                                            <img 
+                                                src={newComment?.image ? URL.createObjectURL(newComment?.image) : undefined}
+                                                style={{
+                                                    visibility: image ? "visible" : "hidden", 
+                                                    display: image ? "block" : "none",
+                                                }}
+                                            />
+                                            {!newComment?.image && (
+                                                <div className={styles.imageAreaText}>
+                                                    <h5>Upload Image</h5>
+                                                    <p>Select Image Here</p>
+                                                </div>
+                                            )}
+                                            <input 
+                                                className={styles.fileInputOverlay}
+                                                type="file" 
+                                                onChange={(e) => handleFileChange(e)}
+                                                accept="image/jpeg, image/png, image/webp"
+                                                required
+                                            />
+                                        </div>
+                                        <textarea 
+                                            name="description" 
+                                            id="description"
+                                            onChange={(e) => setNewComment(prev => ({
+                                                ...prev, 
+                                                comment: e.target.value
+                                            }))}
+                                            rows={5} 
+                                        />
+                                    </div>
+                                    <button onClick={submitAddComment}>Add Comment</button>
+                                </div>
+                            )}
+                        </div>
                     </div>
-                    <div className={styles.rightContainer}>
-                        <p>Title {id}</p>
-                        <p>Author</p>
-                        <p>Publication Date</p>
-                        <p>Description</p>
-                    </div>
-                </div>
+                )}
             </div>
         </div>
     );

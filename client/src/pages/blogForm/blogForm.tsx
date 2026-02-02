@@ -4,8 +4,9 @@ import logo from "../../logo.svg";
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { addBlog } from "../../features/blogs/blogSlice";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useUploadBlogMutation, type BlogUpload } from "../../features/api/apiSlice";
+import { useNavigate } from "react-router-dom";
 
 interface NewBlogFormFields extends HTMLFormControlsCollection {
     title: HTMLInputElement, 
@@ -13,12 +14,13 @@ interface NewBlogFormFields extends HTMLFormControlsCollection {
     image: HTMLInputElement,
 }
 
-interface NewBlogFormElements extends HTMLFormElement {
+export interface NewBlogFormElements extends HTMLFormElement {
     readonly elements: NewBlogFormFields;
 }
 
 export default function BlogForm() {
     const user = JSON.parse(localStorage.getItem("user") || ("{}"));
+    const navigate = useNavigate();
     const [image, setImage] = useState<File>();
     const dispatch = useDispatch();
     const [uploadBlog, { error }] = useUploadBlogMutation();
@@ -47,6 +49,8 @@ export default function BlogForm() {
             const addedBlog = await uploadBlog(newUpload).unwrap();
             toast.success("Blog uploaded successfully");
             dispatch(addBlog(addedBlog));
+            navigate("/");
+
         }
         catch(err) {
             console.error(err, error);
@@ -77,7 +81,7 @@ export default function BlogForm() {
                             className={styles.fileInputOverlay}
                             type="file" 
                             onChange={(e) => handleFileChange(e)}
-                            accept="iamge/jpeg, image/png, image/webp"
+                            accept="image/jpeg, image/png, image/webp"
                             required
                         />
                     </div>

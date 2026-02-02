@@ -4,6 +4,7 @@ import cors from "cors";
 
 import userRouter from "./routes/userRoutes.js";
 import blogRouter from "./routes/blogRoutes.js";
+import commentRouter from "./routes/commentRoutes.js";
 import errorHandler from "./middlewares/errorHandler.js";
 
 dotenv.config();
@@ -31,6 +32,7 @@ app.use(express.json());
 
 app.use("/api/users", userRouter);
 app.use("/api/blogs", blogRouter);
+app.use("/api/comments", commentRouter);
 
 app.use(errorHandler);
 

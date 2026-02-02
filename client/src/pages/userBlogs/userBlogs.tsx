@@ -1,18 +1,23 @@
 import { useEffect, useState } from "react";
 import Header from "../../components/header/header"
 import styles from "./userBlogs.module.css";
-import { useGetBlogsQuery } from "../../features/api/apiSlice";
 import { supabase } from "../../app/supabaseClient";
 import ReactPaginate from "react-paginate";
 import { useNavigate } from "react-router-dom";
-import { skipToken } from "@reduxjs/toolkit/query";
 import { BlogImage } from "../home/home";
+import { shallowEqual, useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../app/store";
+import { useGetBlogsQuery } from "../../features/api/apiSlice";
+import { skipToken } from "@reduxjs/toolkit/query";
+import { setBlogs } from "../../features/blogs/blogSlice";
 
 export default function UserBlogs() {
     const user = JSON.parse(localStorage.getItem("user") || ("{}"));
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const BUCKETNAME = import.meta.env.VITE_SUPABASE_BUCKETNAME;
-    const { data, error, isLoading } = useGetBlogsQuery(user.id ? user.id : skipToken);
+    const storedBlogs = useSelector((state: RootState) => state.blogs.filter(blog => blog.authorId === Number(user.id)), shallowEqual);
+    const { data: getBlogs,  error } = useGetBlogsQuery(storedBlogs.length > 0 ? skipToken : null);
     const [images, setImages] = useState<BlogImage[]>([]);
     const [currentPage, setCurrentPage] = useState(0);
     const itemsPerPage = 6;
@@ -24,8 +29,8 @@ export default function UserBlogs() {
     }, [user]);
 
     useEffect(() => {
-        if(data) {
-            const urls = data.map((blog) => {
+        if(storedBlogs) {
+            const urls = storedBlogs.map((blog) => {
                 const { data } = supabase.storage
                     .from(BUCKETNAME)
                     .getPublicUrl(blog.image);
@@ -33,34 +38,44 @@ export default function UserBlogs() {
                 return {
                     id: blog.id, 
                     image: data.publicUrl,
-                    }   
+                }   
             });
             setImages(urls);
         }
-    }, [data]);
+    }, [storedBlogs]);
+
+    useEffect(() => {
+        if(getBlogs) {
+            dispatch(setBlogs(getBlogs));
+        }
+    }, [getBlogs])
 
     const offset = currentPage * itemsPerPage;
-    const currentBlogs = data?.slice(offset, offset + itemsPerPage)
-    const pageCount = Math.ceil((data?.length || 0) / itemsPerPage);
+    const currentBlogs = storedBlogs?.slice(offset, offset + itemsPerPage)
+    const pageCount = Math.ceil((storedBlogs?.length || 0) / itemsPerPage);
 
     const handlePageClick = (e: { selected: number }) => {
         setCurrentPage(e.selected);
+    }
+
+    const viewSpecificBlog = (id: number | null) => {
+        navigate(`/user-blogs/${id}`);
     }
 
     return (
         <div className="page">
             <Header />
             <div className="content">
-                {isLoading || !currentBlogs ? (
+                {!currentBlogs ? (
                     <>
                         <p>Loading</p>
                     </>
                 ) : (
                     <div className={styles.pageContainer}>
-                        <h2>All Blogs</h2>
+                        <h2>Your Blogs</h2>
                         <div className={styles.blogContainer}>
                             {currentBlogs.map((blog) => (
-                                <div className={styles.blogCard} key={blog.id}>
+                                <div className={styles.blogCard} key={blog.id} onClick={() => viewSpecificBlog(blog.id)}>
                                     <img className={styles.blogImage}
                                         src={images.find(img => img.id === blog.id)?.image || undefined} />
                                     <p>{blog.title}</p>

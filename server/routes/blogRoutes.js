@@ -1,10 +1,12 @@
 import express from "express";
 import multer from "multer";
 import {
+    deleteBlogInfo,
     fetchAllBlogs,
     fetchBlogInfo,
     fetchBlogs,
-    insertBlog
+    insertBlog,
+    updateBlogInfo
 } from "../controllers/blogController.js";
 
 const router = express.Router();
@@ -22,5 +24,16 @@ router.post("/upload",
     ]), 
     insertBlog
 );
+
+// PATCH /api/blogs
+router.patch("/update", 
+    upload.fields([
+        { name: "image", maxCount: 1 }
+    ]), 
+    updateBlogInfo
+);
+
+// DELETE /api/blogs
+router.delete("/:id", deleteBlogInfo);
 
 export default router;

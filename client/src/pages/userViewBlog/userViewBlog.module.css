@@ -1,0 +1,67 @@
+.blogContainer {
+    display: flex;
+    flex-direction: row;
+    position: relative;
+}
+
+.leftContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10px;
+    text-align: center;
+    position: relative;
+    height: max-content;
+    margin: 1rem;
+    gap: 1rem;
+}
+
+.leftContainer img {
+    max-width: 500px;
+    align-self: center;
+}
+
+.rightContainer {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin: 1rem;
+}
+
+.rightContainer p {
+    margin: 0;
+}
+
+.blogDesc {
+    padding-top: 1rem;
+}
+
+.blogTitle {
+    font-weight: bold;
+}
+
+.centerLine {
+    border: 1px solid black;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.buttons button {
+    border-radius: 1rem;
+    border: none;
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    font-weight: normal;
+    font-size: .95rem;
+}
+
+.buttons button:hover {
+    background-color: grey;
+    transition: 0.3s ease;
+}
