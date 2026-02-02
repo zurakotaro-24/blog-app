@@ -147,6 +147,14 @@ export const apiSlice = createApi({
                 };
             }
         }),
+        getAllComments: builder.query<Comment[], string>({
+            query(id) {
+                return {
+                    url: `/comments/list/${id}`, 
+                    method: "GET",
+                }
+            }
+        }), 
     })
 });
 
@@ -159,4 +167,5 @@ export const {
     useDeleteBlogMutation, 
     useUpdateBlogMutation, 
     useUploadCommentMutation, 
+    useGetAllCommentsQuery, 
 } = apiSlice;

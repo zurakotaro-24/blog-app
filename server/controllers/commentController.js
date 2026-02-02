@@ -2,6 +2,8 @@ import asyncHandler from "express-async-handler";
 import { supabase } from "../config/supabaseConnection.js";
 import {
     createInitialComment,
+    getAllCommentsForOneBlog,
+    getCommentResult,
     updateCommentImage,
 } from "../models/commentModel.js"
 import { processImage } from "../services/imageService.js";
@@ -43,13 +45,19 @@ export const insertComment = asyncHandler(async(req, res, next) => {
     }
 
     if(!req.files?.image) {
+        const newComment = await getCommentResult(commentId);
         return res.status(200).json({
-            id: created.id, 
+            id: newComment.id, 
             image: null, 
-            commentText: created.commenttext, 
-            commentDate: created.comment_date, 
-            commentorId: created.commentid,   
-            blogId: created.blogid,
+            commentText: newComment.commenttext, 
+            commentDate: new Date(newComment.comment_date).toLocaleDateString("en-US", {
+                year: "numeric", 
+                month: "long", 
+                day: "numeric",
+            }), 
+            commentorId: newComment.commentorid,   
+            blogId: newComment.blogid, 
+            commentorName: newComment.commentorname,
         });
     }
 
@@ -78,13 +86,28 @@ export const insertComment = asyncHandler(async(req, res, next) => {
         imagePath = objectPath;
     }
 
-    const updated = await updateCommentImage(commentId, imagePath);
+    await updateCommentImage(commentId, imagePath);
+    const newComment = await getCommentResult(commentId);
     return res.status(200).json({
-        id: updated.id, 
-        image: updated.image, 
-        commentText: updated.commenttext, 
-        commentDate: updated.comment_date, 
-        commentorId: updated.commentid,   
-        blogId: updated.blogid,
+        id: newComment.id, 
+        image: newComment.image, 
+        commentText: newComment.commenttext, 
+        commentDate: new Date(newComment.comment_date).toLocaleDateString("en-US", {
+            year: "numeric", 
+            month: "long", 
+            day: "numeric",
+        }), 
+        commentorId: newComment.commentorid,   
+        blogId: newComment.blogid, 
+        commentorName: newComment.commentorname
     });
+});
+
+// @desc Get All comments of a blog 
+// @route GET /api/comments/list/:id 
+export const fetchAllBlogComments = asyncHandler(async(req, res, next) => {
+    const blogId = Number(req.params.id);
+    const comments = await getAllCommentsForOneBlog(blogId);
+    console.log(comments);
+    return res.status(200).json(comments);
 });

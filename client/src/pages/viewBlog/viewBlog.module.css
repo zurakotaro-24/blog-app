@@ -68,6 +68,7 @@
 .comment img {
     max-width: 200px;
     max-height: 200px;
+    margin-top: 1rem;
 }
 
 .addComment {
@@ -111,6 +112,7 @@
 .addCommentInput textarea {
     flex: 1;
     resize: none;
+    padding: 1rem;
 }
 
 .addCommentInput img {

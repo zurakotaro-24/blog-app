@@ -40,7 +40,7 @@ export default function Home() {
                 return {
                     id: blog.id, 
                     image: data.publicUrl,
-                    }   
+                }   
             });
             setImages(urls);
         }

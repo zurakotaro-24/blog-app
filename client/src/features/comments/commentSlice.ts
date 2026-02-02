@@ -6,7 +6,8 @@ export interface Comment {
     commentText: string, 
     commentDate: Date | null, 
     commentorId: number, 
-    blogId: number,
+    blogId: number, 
+    commentorName: string,
 }
 
 const initialState: Comment[] = [];

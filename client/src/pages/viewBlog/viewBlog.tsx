@@ -1,15 +1,21 @@
 import Header from "../../components/header/header"
 import styles from "./viewBlog.module.css";
 import { useNavigate, useParams } from "react-router-dom";
-import { type CommentUpload, useGetBlogQuery, useUploadCommentMutation } from "../../features/api/apiSlice";
+import { type CommentUpload, useGetBlogQuery, useUploadCommentMutation, useGetAllCommentsQuery } from "../../features/api/apiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useState, useEffect } from "react";
 import { supabase } from "../../app/supabaseClient";
 import { BlogImage } from "../home/home";
 import logo from "../../logo.svg";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
-import { addComment } from "../../features/comments/commentSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { addComment, setComments } from "../../features/comments/commentSlice";
+import { RootState } from "../../app/store";
+
+export interface CommentImage {
+    id: number | null; 
+    image: string | null;
+}
 
 export default function ViewBlog() {
     const { id } = useParams();
@@ -18,7 +24,10 @@ export default function ViewBlog() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const [image, setImage] = useState<BlogImage | null>();
-    const { data: blogInfo, error, isLoading } = useGetBlogQuery(id ? id : skipToken);
+    const [commentImage, setCommentImage] = useState<CommentImage[] | null>();
+    const storedComments = useSelector((state: RootState) => state.comments);
+    const { data: blogInfo, error: blogError, isLoading: blogLoading } = useGetBlogQuery(id ? id : skipToken);
+    const { data: blogComments, error: commentError, isLoading: commentLoading } = useGetAllCommentsQuery(id ? id : skipToken);
     const [uploadComment, { error: uploadError }] = useUploadCommentMutation();
     const [isNewCommentOpen, setIsNewCommentOpen] = useState<boolean>(false);
     const [newComment, setNewComment] = useState<{ image: File | undefined, comment: string }>({
@@ -37,6 +46,33 @@ export default function ViewBlog() {
             });
         }
     }, [blogInfo]);
+
+    useEffect(() => {
+        if(blogComments) {
+            console.log("BLog comments", blogComments);
+            dispatch(setComments(blogComments));
+        }
+    }, [blogComments]);
+
+    useEffect(() => {
+        if(storedComments) {
+            const urls: CommentImage[] = [];
+            storedComments.map((comment) => {
+                if(comment.image) {
+                    console.log(comment.image);
+                    const { data } = supabase.storage
+                        .from(BUCKETNAME)
+                        .getPublicUrl(comment.image);
+                    urls.push({
+                        id: comment.id, 
+                        image: data.publicUrl
+                    });
+                }
+            });
+            setCommentImage(urls);
+        }
+
+    }, [storedComments]);
 
     useEffect(() => {
         if(!id) {
@@ -75,8 +111,14 @@ export default function ViewBlog() {
 
         try {
             const addedComment = await uploadComment(newUpload).unwrap();
+            console.log(addedComment);
             toast.success("Comment added successfully");
             dispatch(addComment(addedComment));
+            setNewComment({
+                image: undefined, 
+                comment: "",
+            });
+            setIsNewCommentOpen(false);
         }
         catch(err) {
             console.error(err, uploadError);
@@ -87,7 +129,7 @@ export default function ViewBlog() {
         <div className="page">
             <Header />
             <div className="content">
-                {isLoading || !blogInfo ? (
+                {blogLoading || !blogInfo ? (
                     <>
                         <p>Loading</p>
                     </>
@@ -109,16 +151,26 @@ export default function ViewBlog() {
                         </div>
                         <div className={styles.commentsContainer}>
                             <h5>Comments</h5>
-                            <div className={styles.comment}>
-                                <p className={styles.commentorName}>Commentor Name</p>
-                                <p className={styles.commentText}>Comment</p>
-                                <img src={logo} />
-                            </div>
+                            {storedComments.length < 0 ? (
+                                <div>
+                                    <p>No comments yet</p>
+                                </div>
+                            ) : (
+                                <div>
+                                    {storedComments.map((comment) => ( 
+                                        <div className={styles.comment} key={comment.id}>
+                                            <p className={styles.commentorName}>{comment.commentorName} - {comment.commentDate?.toString()}</p>
+                                            <p className={styles.commentText}>{comment.commentText}</p>
+                                            <img src={commentImage?.find(img => img.id === comment.id)?.image || undefined } />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
                             {!isNewCommentOpen ? (
                                 <div className={styles.addComment}>
                                     <button onClick={openNewComment}>Add Comment</button>
                                 </div>
-                            ): (
+                            ) : (
                                 <div className={styles.addCommentNew}>
                                     <div className={styles.addCommentTop}>
                                         <p>Add Comment</p>
