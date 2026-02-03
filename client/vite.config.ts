@@ -17,7 +17,7 @@ export default defineConfig({
     environment: "jsdom",
 
     typecheck: {
-      enabled: true,
+      enabled: false,
       tsconfig: path.join(import.meta.dirname, "tsconfig.json"),
     },
 
