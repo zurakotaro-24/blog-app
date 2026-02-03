@@ -9,15 +9,15 @@ import { shallowEqual, useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../app/store";
 import { useGetBlogsQuery } from "../../features/api/apiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
-import { setBlogs } from "../../features/blogs/blogSlice";
+import { Blog, setBlogs } from "../../features/blogs/blogSlice";
 
 export default function UserBlogs() {
     const user = JSON.parse(localStorage.getItem("user") || ("{}"));
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const BUCKETNAME = import.meta.env.VITE_SUPABASE_BUCKETNAME;
-    const storedBlogs = useSelector((state: RootState) => state.blogs.filter(blog => blog.authorId === Number(user.id)), shallowEqual);
-    const { data: getBlogs,  error } = useGetBlogsQuery(storedBlogs.length > 0 ? skipToken : null);
+    const userBlogs = useSelector((state: RootState) => state.blogs.filter(blog => blog.authorId === Number(user.id)), shallowEqual);
+    const { data: getBlogs,  error } = useGetBlogsQuery(userBlogs.length > 0 ? skipToken : null);
     const [images, setImages] = useState<BlogImage[]>([]);
     const [currentPage, setCurrentPage] = useState(0);
     const itemsPerPage = 6;
@@ -29,8 +29,8 @@ export default function UserBlogs() {
     }, [user]);
 
     useEffect(() => {
-        if(storedBlogs) {
-            const urls = storedBlogs.map((blog) => {
+        if(userBlogs) {
+            const urls = userBlogs.map((blog) => {
                 const { data } = supabase.storage
                     .from(BUCKETNAME)
                     .getPublicUrl(blog.image);
@@ -42,7 +42,7 @@ export default function UserBlogs() {
             });
             setImages(urls);
         }
-    }, [storedBlogs]);
+    }, [userBlogs]);
 
     useEffect(() => {
         if(getBlogs) {
@@ -51,8 +51,8 @@ export default function UserBlogs() {
     }, [getBlogs])
 
     const offset = currentPage * itemsPerPage;
-    const currentBlogs = storedBlogs?.slice(offset, offset + itemsPerPage)
-    const pageCount = Math.ceil((storedBlogs?.length || 0) / itemsPerPage);
+    const currentBlogs = userBlogs?.slice(offset, offset + itemsPerPage)
+    const pageCount = Math.ceil((userBlogs?.length || 0) / itemsPerPage);
 
     const handlePageClick = (e: { selected: number }) => {
         setCurrentPage(e.selected);
@@ -71,39 +71,47 @@ export default function UserBlogs() {
                         <p>Loading</p>
                     </>
                 ) : (
-                    <div className={styles.pageContainer}>
+                    <div>
                         <h2>Your Blogs</h2>
-                        <div className={styles.blogContainer}>
-                            {currentBlogs.map((blog) => (
-                                <div className={styles.blogCard} key={blog.id} onClick={() => viewSpecificBlog(blog.id)}>
-                                    <img className={styles.blogImage}
-                                        src={images.find(img => img.id === blog.id)?.image || undefined} />
-                                    <p>{blog.title}</p>
-                                    <p>{blog.authorName}</p>
+                        {userBlogs.length <= 0 ? (
+                            <div>
+                                <p>No blogs posted yet</p>
+                            </div>
+                        ) : (
+                            <div className={styles.pageContainer}>
+                                <div className={styles.blogContainer}>
+                                    {currentBlogs.map((blog) => (
+                                        <div className={styles.blogCard} key={blog.id} onClick={() => viewSpecificBlog(blog.id)}>
+                                            <img className={styles.blogImage}
+                                                src={images.find(img => img.id === blog.id)?.image || undefined} />
+                                            <p>{blog.title}</p>
+                                            <p>{blog.authorName}</p>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
-                        <div className={styles.paginateContainer}>
-                            <ReactPaginate 
-                                breakLabel="..." 
-                                nextLabel="next >" 
-                                onPageChange={handlePageClick} 
-                                pageRangeDisplayed={itemsPerPage} 
-                                pageCount={pageCount} 
-                                previousLabel="< prev" 
-                                pageClassName="page-item"
-                                pageLinkClassName="page-link"
-                                previousClassName="page-item"
-                                previousLinkClassName="page-link"
-                                nextClassName="page-item"
-                                nextLinkClassName="page-link"
-                                breakClassName="page-item"
-                                breakLinkClassName="page-link"
-                                containerClassName="pagination"
-                                activeClassName="active"
-                                renderOnZeroPageCount={null}
-                            />
-                        </div>
+                                <div className={styles.paginateContainer}>
+                                    <ReactPaginate 
+                                        breakLabel="..." 
+                                        nextLabel="next >" 
+                                        onPageChange={handlePageClick} 
+                                        pageRangeDisplayed={itemsPerPage} 
+                                        pageCount={pageCount} 
+                                        previousLabel="< prev" 
+                                        pageClassName="page-item"
+                                        pageLinkClassName="page-link"
+                                        previousClassName="page-item"
+                                        previousLinkClassName="page-link"
+                                        nextClassName="page-item"
+                                        nextLinkClassName="page-link"
+                                        breakClassName="page-item"
+                                        breakLinkClassName="page-link"
+                                        containerClassName="pagination"
+                                        activeClassName="active"
+                                        renderOnZeroPageCount={null}
+                                    />
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

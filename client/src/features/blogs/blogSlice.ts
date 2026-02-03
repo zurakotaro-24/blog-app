@@ -21,7 +21,7 @@ const blogSlice = createSlice({
             state.push(action.payload);
         }, 
         setBlogs(state, action: PayloadAction<Blog[]>) {
-            return action.payload;
+            return [...state, ...action.payload].sort((a, b) => a.id - b.id);
         }, 
         updateBlogState(state, action: PayloadAction<UpdatedBlogResult>) {
             const index = state.findIndex(blog => blog.id === action.payload.id);
