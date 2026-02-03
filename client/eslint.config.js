@@ -48,7 +48,7 @@ const eslintConfig = config(
     },
     settings: {
       vitest: {
-        typecheck: true,
+        typecheck: false,
       },
     },
     rules: {
