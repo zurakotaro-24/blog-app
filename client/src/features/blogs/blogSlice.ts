@@ -18,7 +18,7 @@ const blogSlice = createSlice({
     initialState, 
     reducers: {
         addBlog(state, action: PayloadAction<Blog>) {
-            state.push(action.payload);
+            return [...state, action.payload];
         }, 
         setBlogs(state, action: PayloadAction<Blog[]>) {
             return [...state, ...action.payload].sort((a, b) => a.id - b.id);

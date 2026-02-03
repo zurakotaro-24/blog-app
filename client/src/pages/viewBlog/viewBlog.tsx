@@ -1,14 +1,14 @@
 import Header from "../../components/header/header"
 import styles from "./viewBlog.module.css";
 import { useNavigate, useParams } from "react-router-dom";
-import { type CommentUpload, useGetBlogQuery, useUploadCommentMutation, useGetAllCommentsQuery } from "../../features/api/apiSlice";
+import { type CommentUpload, useGetBlogsQuery, useGetBlogQuery, useUploadCommentMutation, useGetAllCommentsQuery } from "../../features/api/apiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useState, useEffect } from "react";
 import { supabase } from "../../app/supabaseClient";
 import { BlogImage } from "../home/home";
 import logo from "../../logo.svg";
 import { toast } from "react-toastify";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector, useDispatch, shallowEqual } from "react-redux";
 import { addComment, setComments } from "../../features/comments/commentSlice";
 import { RootState } from "../../app/store";
 
@@ -26,7 +26,9 @@ export default function ViewBlog() {
     const [image, setImage] = useState<BlogImage | null>();
     const [commentImage, setCommentImage] = useState<CommentImage[] | null>();
     const storedComments = useSelector((state: RootState) => state.comments);
-    const { data: blogInfo, error: blogError, isLoading: blogLoading } = useGetBlogQuery(id ? id : skipToken);
+    const storedBlog = useSelector((state: RootState) => state.blogs.find(blog => blog.id === Number(id)));
+    const { data: getBlogs, error, isLoading } = useGetBlogsQuery(storedBlog ? skipToken : null);
+    // const { data: blogInfo, error: blogError, isLoading: blogLoading } = useGetBlogQuery(id ? id : skipToken);
     const { data: blogComments, error: commentError, isLoading: commentLoading } = useGetAllCommentsQuery(id ? id : skipToken);
     const [uploadComment, { error: uploadError }] = useUploadCommentMutation();
     const [isNewCommentOpen, setIsNewCommentOpen] = useState<boolean>(false);
@@ -36,20 +38,19 @@ export default function ViewBlog() {
     });
 
     useEffect(() => {
-        if(blogInfo) {
+        if(storedBlog) {
             const { data: { publicUrl } } = supabase.storage
                 .from(BUCKETNAME)
-                .getPublicUrl(blogInfo.image);
+                .getPublicUrl(storedBlog.image);
             setImage({
-                id: blogInfo.id, 
+                id: storedBlog.id, 
                 image: publicUrl,
             });
         }
-    }, [blogInfo]);
+    }, [storedBlog]);
 
     useEffect(() => {
         if(blogComments) {
-            console.log("BLog comments", blogComments);
             dispatch(setComments(blogComments));
         }
     }, [blogComments]);
@@ -59,7 +60,6 @@ export default function ViewBlog() {
             const urls: CommentImage[] = [];
             storedComments.map((comment) => {
                 if(comment.image) {
-                    console.log(comment.image);
                     const { data } = supabase.storage
                         .from(BUCKETNAME)
                         .getPublicUrl(comment.image);
@@ -106,12 +106,11 @@ export default function ViewBlog() {
             image: newComment?.image ? newComment.image : undefined, 
             commentText: newComment.comment, 
             commentorId: user.id, 
-            blogId: blogInfo!.id.toString(),
+            blogId: storedBlog!.id.toString(),
         }
 
         try {
             const addedComment = await uploadComment(newUpload).unwrap();
-            console.log(addedComment);
             toast.success("Comment added successfully");
             dispatch(addComment(addedComment));
             setNewComment({
@@ -129,7 +128,7 @@ export default function ViewBlog() {
         <div className="page">
             <Header />
             <div className="content">
-                {blogLoading || !blogInfo ? (
+                {isLoading || !storedBlog ? (
                     <>
                         <p>Loading</p>
                     </>
@@ -143,10 +142,10 @@ export default function ViewBlog() {
                                 
                             </div>
                             <div className={styles.rightContainer}>
-                                <p className={styles.blogTitle}>{blogInfo.title}</p>
-                                <p>Published by: {blogInfo.authorName}</p>
-                                <p>Published on: {blogInfo.publicationDate?.toString()}</p>
-                                <p className={styles.blogDesc}>{blogInfo.description}</p>
+                                <p className={styles.blogTitle}>{storedBlog.title}</p>
+                                <p>Published by: {storedBlog.authorName}</p>
+                                <p>Published on: {storedBlog.publicationDate?.toString()}</p>
+                                <p className={styles.blogDesc}>{storedBlog.description}</p>
                             </div>
                         </div>
                         <div className={styles.commentsContainer}>

@@ -50,7 +50,6 @@ export default function BlogForm() {
             toast.success("Blog uploaded successfully");
             dispatch(addBlog(addedBlog));
             navigate("/");
-
         }
         catch(err) {
             console.error(err, error);
