@@ -136,7 +136,7 @@ export const deleteBlogInfo = asyncHandler(async(req, res, next) => {
 });
 
 // @desc Update a blog
-// @route POST /api/blogs/edit/:id 
+// @route PATCH /api/blogs/update
 export const updateBlogInfo = asyncHandler(async(req, res, next) => {
     const {
         id, 
@@ -149,24 +149,28 @@ export const updateBlogInfo = asyncHandler(async(req, res, next) => {
     const bucketName = "blogs-upload";
 
     let newImagePath = imagePath;
-    const imageFile = req.files.image[0];
-    if(imageFile) {
-        const fileName = `blogImage`;
-        const { buffer, ext, mimeType } = await processImage(imageFile.buffer);
-        const objectPath = `${folderName}/${fileName}_${Date.now()}${ext}`;
-        const { data, error } = await supabase.storage
-            .from(bucketName)
-            .upload(objectPath, buffer, {
-                contentType: mimeType, 
-                upsert: true,
-            })
 
-        if(error) {
-            console.error(error.message);
-            throw error;
+    if(req.files?.image) {
+        const imageFile = req.files?.image[0];
+
+        if(imageFile) {
+            const fileName = `blogImage`;
+            const { buffer, ext, mimeType } = await processImage(imageFile.buffer);
+            const objectPath = `${folderName}/${fileName}_${Date.now()}${ext}`;
+            const { data, error } = await supabase.storage
+                .from(bucketName)
+                .upload(objectPath, buffer, {
+                    contentType: mimeType, 
+                    upsert: true,
+                })
+
+            if(error) {
+                console.error(error.message);
+                throw error;
+            }
+
+            newImagePath = objectPath;
         }
-
-        newImagePath = objectPath;
     }
 
 

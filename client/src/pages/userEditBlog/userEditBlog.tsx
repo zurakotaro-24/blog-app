@@ -1,13 +1,14 @@
 import Header from "../../components/header/header";
 import styles from "./userEditBlog.module.css";
 import { useState, useEffect } from "react";
-import { BlogUpdate, UpdatedBlogResult, useGetBlogQuery, useUpdateBlogMutation } from "../../features/api/apiSlice";
+import { BlogUpdate, UpdatedBlogResult, useGetBlogQuery, useUpdateBlogMutation, useGetBlogsQuery } from "../../features/api/apiSlice";
 import { useNavigate, useParams } from "react-router-dom";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { supabase } from "../../app/supabaseClient";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
-import { updateBlogState } from "../../features/blogs/blogSlice";
+import { shallowEqual, useDispatch, useSelector } from "react-redux";
+import { setBlogs, updateBlogState } from "../../features/blogs/blogSlice";
+import { RootState } from "../../app/store";
 
 export default function UserEditBlog() {
     const { id } = useParams();
@@ -20,27 +21,35 @@ export default function UserEditBlog() {
         title: string, description: string, image: string }>({
         title: "", description: "", image: ""
     });
-    const { data: blogInfo, error, isLoading } = useGetBlogQuery(id ? id : skipToken);
+    const storedBlog = useSelector((state: RootState) => state.blogs.find(blog => blog.id === Number(id)), shallowEqual);
+    const { data: getBlogs, error, isLoading } = useGetBlogsQuery(storedBlog ? skipToken : null);    
+    // const { data: blogInfo, error, isLoading } = useGetBlogQuery(id ? id : skipToken);
     const [updateBlog, { error: updateError }] = useUpdateBlogMutation();
 
     useEffect(() => {
-        if(blogInfo) {
-            if(!(user.id == blogInfo.authorId)) {
+        if(storedBlog) {
+            if(!(user.id == storedBlog.authorId)) {
                 navigate("/");
             }
             else {
                 const { data: { publicUrl } } = supabase.storage
                     .from(BUCKETNAME)
-                    .getPublicUrl(blogInfo.image);
+                    .getPublicUrl(storedBlog.image);
                 setBlog(prev => ({
                     ...prev, 
-                    title: blogInfo.title, 
-                    description: blogInfo.description, 
+                    title: storedBlog.title, 
+                    description: storedBlog.description, 
                     image: publicUrl,
                 }));
             }
         }
-    }, [blogInfo]); 
+    }, [storedBlog]); 
+
+    useEffect(() => {
+        if(getBlogs) {
+            dispatch(setBlogs(getBlogs));
+        }
+    }, [getBlogs])
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -51,19 +60,19 @@ export default function UserEditBlog() {
         e.preventDefault();
 
         try {
-            if(id && blogInfo?.authorId) {
+            if(id && storedBlog?.authorId) {
                 const updateBlogInfo: BlogUpdate = {
                     id: id, 
                     title: blog.title, 
                     description: blog?.description,
                     image: image, 
-                    imagePath: blogInfo.image,
-                    authorId: blogInfo.authorId.toString(), 
+                    imagePath: storedBlog.image,
+                    authorId: storedBlog.authorId.toString(), 
                 }
                 const result = await updateBlog(updateBlogInfo).unwrap();
                 dispatch(updateBlogState(result));
-                navigate("/");
-                toast.success("Blog uploaded successfully");
+                navigate(`/user-blogs/${id}`);
+                toast.success("Blog updated successfully");
             }
         }
         catch(err) {
@@ -95,7 +104,7 @@ export default function UserEditBlog() {
                             className={styles.fileInputOverlay}
                             type="file" 
                             onChange={(e) => handleFileChange(e)}
-                            accept="iamge/jpeg, image/png, image/webp"
+                            accept="image/jpeg, image/png, image/webp"
                         />
                     </div>
                     <div className={styles.rightForm}>

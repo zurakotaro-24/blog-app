@@ -1,32 +1,44 @@
 import Header from "../../components/header/header"
 import styles from "./userViewBlog.module.css";
 import { useNavigate, useParams } from "react-router-dom";
-import { useDeleteBlogMutation, useGetBlogQuery } from "../../features/api/apiSlice";
+import { useDeleteBlogMutation, useGetBlogQuery, useGetBlogsQuery } from "../../features/api/apiSlice";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { useState, useEffect } from "react";
 import { supabase } from "../../app/supabaseClient";
 import { BlogImage } from "../home/home";
 import { toast } from "react-toastify";
+import { shallowEqual, useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../app/store";
+import { setBlogs } from "../../features/blogs/blogSlice";
 
 export default function UserViewBlog() {
     const { id } = useParams();
     const BUCKETNAME = import.meta.env.VITE_SUPABASE_BUCKETNAME;
     const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [image, setImage] = useState<BlogImage | null>();
-    const { data: blogInfo, error, isLoading } = useGetBlogQuery(id ? id : skipToken);
+    const storedBlog = useSelector((state: RootState) => state.blogs.find(blog => blog.id === Number(id)), shallowEqual);
+    const { data: getBlogs, error, isLoading } = useGetBlogsQuery(storedBlog ? skipToken : null);
+    // const { data: blogInfo, error, isLoading } = useGetBlogQuery(id ? id : skipToken);
     const [ deleteBlog, { error: deleteError }] = useDeleteBlogMutation();
 
     useEffect(() => {
-        if(blogInfo) {
+        if(storedBlog) {
             const { data: { publicUrl } } = supabase.storage
                 .from(BUCKETNAME)
-                .getPublicUrl(blogInfo.image);
+                .getPublicUrl(storedBlog.image);
             setImage({
-                id: blogInfo.id, 
+                id: storedBlog.id, 
                 image: publicUrl,
             });
         }
-    }, [blogInfo]);
+    }, [storedBlog]);
+
+    useEffect(() => {
+        if(getBlogs) {
+            dispatch(setBlogs(getBlogs));
+        }
+    }, [getBlogs]); 
 
     const navigateToEdit = (blogId: number | null) => {
         navigate(`/user-blogs/edit/${blogId}`);
@@ -49,7 +61,7 @@ export default function UserViewBlog() {
         <div className="page">
             <Header />
             <div className="content">
-                {isLoading || !blogInfo ? (
+                {isLoading || !storedBlog ? (
                     <>
                         <p>Loading</p>
                     </>
@@ -66,10 +78,10 @@ export default function UserViewBlog() {
                         </div>
                         <div className={styles.centerLine}></div>
                         <div className={styles.rightContainer}>
-                            <p className={styles.blogTitle}>{blogInfo.title}</p>
-                            <p>Published by: {blogInfo.authorName}</p>
-                            <p>Published on: {blogInfo.publicationDate?.toString()}</p>
-                            <p className={styles.blogDesc}>{blogInfo.description}</p>
+                            <p className={styles.blogTitle}>{storedBlog.title}</p>
+                            <p>Published by: {storedBlog.authorName}</p>
+                            <p>Published on: {storedBlog.publicationDate?.toString()}</p>
+                            <p className={styles.blogDesc}>{storedBlog.description}</p>
                         </div>
                     </div>
                 )}

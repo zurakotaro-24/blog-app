@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { setBlogs } from "../../features/blogs/blogSlice";
 import { RootState } from "../../app/store";
+import { skipToken } from "@reduxjs/toolkit/query";
 
 export interface BlogImage {
     id: number | null; 
@@ -19,7 +20,7 @@ export default function Home() {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const storedBlogs = useSelector((state: RootState) => state.blogs);
-    const { data: blogs, error, isLoading } = useGetBlogsQuery(null);
+    const { data: blogs, error, isLoading } = useGetBlogsQuery(storedBlogs.length > 0 ? skipToken : null);
     const [images, setImages] = useState<BlogImage[]>([]);
     const [currentPage, setCurrentPage] = useState(0);
     const itemsPerPage = 6;

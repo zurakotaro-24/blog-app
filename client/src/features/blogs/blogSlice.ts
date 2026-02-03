@@ -30,7 +30,7 @@ const blogSlice = createSlice({
                     ...state[index],  
                     title: action.payload.title, 
                     description: action.payload.description, 
-                    image: action.payload.image,
+                    image: action.payload.image, 
                 };
             }
         }, 

@@ -108,6 +108,6 @@ export const insertComment = asyncHandler(async(req, res, next) => {
 export const fetchAllBlogComments = asyncHandler(async(req, res, next) => {
     const blogId = Number(req.params.id);
     const comments = await getAllCommentsForOneBlog(blogId);
-    console.log(comments);
+
     return res.status(200).json(comments);
 });
