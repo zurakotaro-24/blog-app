@@ -56,6 +56,7 @@ export const apiSlice = createApi({
             query: acc => ({
                 url: `/users/create-acc`, 
                 method: "POST",
+                headers: { "Content-Type": "application/json" },
                 body: acc 
             }),
         }), 
@@ -63,6 +64,7 @@ export const apiSlice = createApi({
             query: acc => ({
                 url: `/users/login-acc`, 
                 method: "POST", 
+                headers: { "Content-Type": "application/json" },
                 body: acc,
             }),
         }),  
@@ -79,6 +81,7 @@ export const apiSlice = createApi({
                 return {
                     url: `/blogs/upload`, 
                     method: "POST", 
+                    headers: { "Content-Type": "application/json" },
                     body: formData,
                 };
             }
@@ -88,11 +91,13 @@ export const apiSlice = createApi({
                 if(id) {
                     return {
                         url: `/blogs/list/${id}`, 
+                        headers: { "Content-Type": "application/json" },
                         method: "GET", 
                     }
                 }
                 return {
                     url: `/blogs/list`, 
+                    headers: { "Content-Type": "application/json" },
                     method: "GET",
                 }
             }
@@ -102,6 +107,7 @@ export const apiSlice = createApi({
                 return {
                     url: `/blogs/${id}`, 
                     method: "GET",
+                    headers: { "Content-Type": "application/json" },
                 }
             }
         }),
@@ -109,6 +115,7 @@ export const apiSlice = createApi({
             query: blogId => ({
                 url: `/blogs/${blogId}`, 
                 method: "DELETE", 
+                headers: { "Content-Type": "application/json" },
             })
         }),
         updateBlog: builder.mutation<UpdatedBlogResult, BlogUpdate>({
@@ -126,6 +133,7 @@ export const apiSlice = createApi({
                 return {
                     url: `/blogs/update`, 
                     method: "PATCH", 
+                    headers: { "Content-Type": "application/json" },
                     body: formData,
                 };
             }
@@ -143,6 +151,7 @@ export const apiSlice = createApi({
                 return {
                     url: `/comments/upload`, 
                     method: "POST", 
+                    headers: { "Content-Type": "application/json" },
                     body: formData,
                 };
             }
@@ -152,6 +161,7 @@ export const apiSlice = createApi({
                 return {
                     url: `/comments/list/${id}`, 
                     method: "GET",
+                    headers: { "Content-Type": "application/json" },
                 }
             }
         }), 
